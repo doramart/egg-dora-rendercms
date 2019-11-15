@@ -1,15 +1,28 @@
 <template>
   <div class="block dr-pagination">
     <div v-if="pageInfo">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page.sync="pageInfo.current"
-        :page-sizes="[10, 30, 50]"
-        :page-size="pageInfo.pageSize"
-        layout="sizes, prev, pager, next"
-        :total="pageInfo.totalItems"
-      ></el-pagination>
+      <div v-if="device == 'mobile'">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page.sync="pageInfo.current"
+          :page-size="pageInfo.pageSize"
+          small
+          layout="prev, pager, next"
+          :total="pageInfo.totalItems"
+        ></el-pagination>
+      </div>
+      <div v-else>
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page.sync="pageInfo.current"
+          :page-sizes="[10, 30, 50]"
+          :page-size="pageInfo.pageSize"
+          layout="sizes, prev, pager, next"
+          :total="pageInfo.totalItems"
+        ></el-pagination>
+      </div>
     </div>
   </div>
 </template>

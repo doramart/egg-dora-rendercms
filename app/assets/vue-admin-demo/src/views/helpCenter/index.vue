@@ -1,14 +1,11 @@
 <template>
   <div :class="classObj" class="adminUser">
     <div class="main-container">
-      <HelpCenterForm :dialogState="formState" ref="contentFrom"></HelpCenterForm>
+      <HelpCenterForm :device="device" :dialogState="formState" ref="contentFrom"></HelpCenterForm>
       <el-row class="dr-datatable">
         <el-col :span="24">
           <TopBar type="helpCenter" :pageInfo="helpCenterList.pageInfo"></TopBar>
-          <DataTable
-            :pageInfo="helpCenterList.pageInfo"
-            :dataList="helpCenterList.docs"
-          ></DataTable>
+          <DataTable :pageInfo="helpCenterList.pageInfo" :dataList="helpCenterList.docs"></DataTable>
           <Pagination :device="device" :pageInfo="helpCenterList.pageInfo" pageType="helpCenter"></Pagination>
         </el-col>
       </el-row>
@@ -37,9 +34,7 @@ export default {
     HelpCenterForm,
     Pagination
   },
-  methods: {
-    
-  },
+  methods: {},
   computed: {
     ...mapGetters(["helpCenterList"]),
     formState() {

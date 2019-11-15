@@ -169,9 +169,9 @@ let ProjectConfigurationController = {
 
             let assetsPath = path.resolve(__dirname, '../../assets');
             let vue_admin_source_path = `${assetsPath}/vue-admin-demo`;
-            let vue_admin_target_source_path = `${app.config.baseDir}/backstage`;
+            let vue_admin_target_source_path = `${targetProPath}/backstage`;
             let egg_plugin_source_path = `${assetsPath}/egg-dora-demo`;
-            let egg_plugin_target_source_path = `${app.config.baseDir}/lib/plugin`;
+            let egg_plugin_target_source_path = `${targetProPath}/lib/plugin`;
 
             // console.log('--vue_admin_source_path--', vue_admin_source_path);
             // console.log('--vue_admin_target_source_path--', vue_admin_target_source_path);
