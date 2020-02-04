@@ -17,7 +17,7 @@ exports.doraRenderCms = {
     isindex: 0, // 是否需要前台访问，1：需要，0：不需要,入口地址:'/ext/devteam/index/index'
     version: pkgInfo.version, // 版本号
     iconName: 'icon_render', // 主菜单图标名称
-    adminUrl: 'https://cdn.html-js.cn/cms/plugins/static/admin/renderCms/js/app.js',
+    adminUrl: '/renderCms/js/app.js',
     adminApi: [{
         url: 'renderCms/justdo',
         method: 'post',

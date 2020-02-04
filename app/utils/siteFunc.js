@@ -2,7 +2,7 @@
  * @Author: doramart 
  * @Date: 2019-09-25 14:16:44 
  * @Last Modified by: doramart
- * @Last Modified time: 2019-10-22 15:45:18
+ * @Last Modified time: 2019-11-18 14:23:59
  */
 
 const MongoClient = require('mongodb').MongoClient;
@@ -153,6 +153,7 @@ var siteFunc = {
             searchHtmlStr,
             searchInputStr,
             ruleStr,
+            storePropsStr
         }
     },
 
