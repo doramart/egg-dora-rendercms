@@ -17,6 +17,7 @@
         ref="ruleForm"
         label-width="120px"
         class="demo-ruleForm"
+        :label-position="device == 'mobile' ? 'top' : 'right'"
       >
         <!-- FORMDATAPROPS -->
         <el-form-item>
@@ -37,7 +38,8 @@ import _ from "lodash";
 export default {
   props: {
     dialogState: Object,
-    groups: Array
+    groups: Array,
+    device: String
   },
   data() {
     return {

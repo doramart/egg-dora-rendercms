@@ -16,6 +16,7 @@ exports.doraRenderCms = {
     isadm: 1, // 是否有后台管理，1：有，0：没有，入口地址:'/ext/devteam/admin/index'
     isindex: 0, // 是否需要前台访问，1：需要，0：不需要,入口地址:'/ext/devteam/index/index'
     version: pkgInfo.version, // 版本号
+    operationInstructions: "", // 操作说明
     iconName: 'icon_render', // 主菜单图标名称
     adminUrl: 'https://cdn.html-js.cn/cms/plugins/static/admin/renderCms/js/app.js',
     adminApi: [{
@@ -59,6 +60,12 @@ exports.doraRenderCms = {
         method: 'get',
         controllerName: 'removes',
         details: '删除配置',
+        noPower: true
+    }, {
+        url: 'renderCms/translateWords',
+        method: 'get',
+        controllerName: 'translateWords',
+        details: '词语翻译',
         noPower: true
     }],
     fontApi: [],
