@@ -17,7 +17,7 @@ exports.doraHelpCenter = {
     isindex: 0, // 是否需要前台访问，1：需要，0：不需要,入口地址:'/ext/devteam/index/index'
     version: pkgInfo.version, // 版本号
     iconName: 'icon_service', // 主菜单图标名称
-    adminUrl: 'https://cdn.html-js.cn/cms/plugins/static/admin/helpCenter/js/app.js',
+    adminUrl: '/helpCenter/js/app.js',
     adminApi: [{
         url: 'helpCenter/getList',
         method: 'get',
@@ -53,13 +53,13 @@ exports.doraHelpCenter = {
 
     initData: '', // 初始化数据脚本
     pluginsConfig: ` 
-    exports.doraHelpCenter = {\n
+    module.exports = {\n
         enable: true,\n
          \n
     };\n
     `, // 插入到 plugins.js 中的配置
     defaultConfig: `
-    helpCenterRouter:{\n
+    module.exports = {\n
         match: [ctx => ctx.path.startsWith('/manage/helpCenter'), ctx => ctx.path.startsWith('/api/helpCenter')],\n
     },\n
     `, // 插入到 config.default.js 中的配置

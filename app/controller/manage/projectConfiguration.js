@@ -2,6 +2,7 @@ const _ = require('lodash');
 const shell = require('shelljs');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const MongoClient = require('mongodb').MongoClient;
 const {
     siteFunc,
@@ -21,6 +22,11 @@ const projectConfigurationRule = (ctx) => {
             type: "string",
             required: true,
             message: ctx.__("validate_inputCorrect", [ctx.__("label_user_email")])
+        },
+        mongoLinkAdress: {
+            type: "string",
+            required: true,
+            message: "invalid mongoLinkAdresse"
         },
         type: {
             type: "string",
@@ -59,6 +65,7 @@ let ProjectConfigurationController = {
             const formObj = {
                 tableName: fields.tableName,
                 localPath: fields.localPath,
+                mongoLinkAdress: fields.mongoLinkAdress,
                 type: fields.type,
             }
 
@@ -108,12 +115,14 @@ let ProjectConfigurationController = {
             ctx.validate(projectConfigurationRule(ctx), {
                 tableName: fields.tableName,
                 localPath: fields.localPath,
+                mongoLinkAdress: fields.mongoLinkAdress,
                 type: fields.type,
             });
 
             const modelObj = {
                 tableName: fields.tableName,
                 localPath: fields.localPath,
+                mongoLinkAdress: fields.mongoLinkAdress,
                 type: fields.type,
             }
 
@@ -147,6 +156,30 @@ let ProjectConfigurationController = {
         }
     },
 
+    async translateWords(ctx) {
+
+        try {
+            let lang = ctx.query.lang;
+            let targetWord = ctx.query.targetWord;
+
+            let translateItem = await axios.get(`http://translate.google.cn/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=zh-CN&tl=${encodeURI(lang)}&q=${encodeURI(targetWord)}`)
+            let targetTrans = '';
+            if (!_.isEmpty(translateItem) && translateItem.status == 200) {
+                targetTrans = translateItem.data
+            }
+
+            ctx.helper.renderSuccess(ctx, {
+                data: targetTrans
+            });
+
+        } catch (err) {
+
+            ctx.helper.renderFail(ctx, {
+                message: err
+            });
+        }
+    },
+
     async doRender(ctx, app) {
 
         try {
@@ -169,14 +202,9 @@ let ProjectConfigurationController = {
 
             let assetsPath = path.resolve(__dirname, '../../assets');
             let vue_admin_source_path = `${assetsPath}/vue-admin-demo`;
-            let vue_admin_target_source_path = `${app.config.baseDir}/backstage`;
+            let vue_admin_target_source_path = `${targetProPath}/backstage`;
             let egg_plugin_source_path = `${assetsPath}/egg-dora-demo`;
-            let egg_plugin_target_source_path = `${app.config.baseDir}/lib/plugin`;
-
-            // console.log('--vue_admin_source_path--', vue_admin_source_path);
-            // console.log('--vue_admin_target_source_path--', vue_admin_target_source_path);
-            // console.log('--egg_plugin_source_path--', egg_plugin_source_path);
-            // console.log('--egg_plugin_target_source_path--', egg_plugin_target_source_path);
+            let egg_plugin_target_source_path = `${targetProPath}/lib/plugin`;
 
             // 文件清理
             if (fs.existsSync(`${vue_admin_target_source_path}/${targetKey}`)) {
@@ -349,7 +377,7 @@ let ProjectConfigurationController = {
             // 添加资源文件
             let targetResourceId = (targetResource.parentId)[(targetResource.parentId).length - 1];
             // 插入主菜单
-            let thisParentId = await siteFunc.addDataToAdminResource(MongoClient, databaseInfo.tableName, {
+            let thisParentId = await siteFunc.addDataToAdminResource(MongoClient, databaseInfo, {
                 label: `${targetKey}Manage`,
                 type: '0',
                 api: '',
@@ -362,7 +390,7 @@ let ProjectConfigurationController = {
                 comments: `${modelName.zh}管理`,
             });
             // 插入功能菜单(获取列表)
-            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo.tableName, {
+            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo, {
                 label: `${targetKey}GetList`,
                 type: '1',
                 api: `${targetKey}/getList`,
@@ -375,7 +403,7 @@ let ProjectConfigurationController = {
                 comments: `获取${modelName.zh}`,
             });
             // 插入功能菜单(获取单个)
-            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo.tableName, {
+            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo, {
                 label: `${targetKey}GetOne`,
                 type: '1',
                 api: `${targetKey}/getOne`,
@@ -388,7 +416,7 @@ let ProjectConfigurationController = {
                 comments: `获取单个${modelName.zh}`,
             });
             // 插入功能菜单(新增)
-            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo.tableName, {
+            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo, {
                 label: `${targetKey}Add`,
                 type: '1',
                 api: `${targetKey}/addOne`,
@@ -401,7 +429,7 @@ let ProjectConfigurationController = {
                 comments: `新增${modelName.zh}`,
             });
             // 插入功能菜单(修改)
-            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo.tableName, {
+            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo, {
                 label: `${targetKey}Modify`,
                 type: '1',
                 api: `${targetKey}/updateOne`,
@@ -414,7 +442,7 @@ let ProjectConfigurationController = {
                 comments: `修改${modelName.zh}`,
             });
             // 插入功能菜单(删除)
-            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo.tableName, {
+            await siteFunc.addDataToAdminResource(MongoClient, databaseInfo, {
                 label: `${targetKey}Delete`,
                 type: '1',
                 api: `${targetKey}/delete`,
@@ -426,6 +454,31 @@ let ProjectConfigurationController = {
                 enable: true,
                 comments: `删除${modelName.zh}`,
             });
+
+            // 修改配置文件
+            let pluginConfigPath = path.join(app.config.baseDir, `config/plugin.js`);
+            let configDefaultPath = path.join(app.config.baseDir, `config/config.default.js`);
+            let pluginsConfig = `
+            module.exports = {\n  
+                enable: true,\n        package: '${eggPluginKey}',\n        path: path.join(__dirname, "../lib/plugin/${eggPluginKey}")
+            };\n  
+            `;
+            let defaultConfig = `
+            module.exports =  {\n
+                match: [ctx => ctx.path.startsWith('/manage/${targetKey}')],\n
+              },\n
+            `;
+            if (fs.existsSync(pluginConfigPath)) {
+                let pluginStr = `// ${targetKey}PluginBegin\n
+                ${pluginsConfig}// ${targetKey}PluginEnd\n    `;
+                siteFunc.appendTxtToFileByLine(pluginConfigPath, 1, pluginStr);
+            }
+
+            if (fs.existsSync(configDefaultPath)) {
+                let configStr = `// ${targetKey}PluginBegin\n
+                ${defaultConfig}// ${targetKey}PluginEnd\n    `;
+                siteFunc.appendTxtToFileByLine(configDefaultPath, 2, configStr);
+            }
 
             ctx.helper.renderSuccess(ctx);
 
@@ -439,16 +492,35 @@ let ProjectConfigurationController = {
 
     async getAdminResources(ctx, app) {
 
-        let targetDB = ctx.query.targetDB ? ctx.query.targetDB : 'doracms2';
+        let targetDB = ctx.query.tableName ? ctx.query.tableName : 'doracms2';
+        let mongoLinkAdress = ctx.query.mongoLinkAdress;
+
+        let targetItem = await ctx.service.projectConfiguration.item(ctx, {
+            query: {
+                tableName: targetDB
+            }
+        }) || {};
+
+        if (!mongoLinkAdress && !targetItem.mongoLinkAdress) {
+            throw new Error(ctx.__('validate_error_params'));
+        }
+
+        let linkAddress = mongoLinkAdress ? mongoLinkAdress : (!_.isEmpty(targetItem) ? targetItem.mongoLinkAdress : '');
+
+        if (!linkAddress) {
+            throw new Error(ctx.__('validate_error_params'));
+        }
 
         var selectData = () => {
             return new Promise((resolve, reject) => {
 
-                MongoClient.connect('mongodb://localhost:27017', {
+                MongoClient.connect(linkAddress, {
                     useNewUrlParser: true,
                     useUnifiedTopology: true
                 }, async function (err, client) {
-                    console.log("连接成功: ", targetDB);
+                    if (err) {
+                        throw new Error("数据库连接失败");
+                    }
                     var db = client.db(targetDB);
                     //连接到表
                     var collection = db.collection('adminresources');
@@ -457,12 +529,19 @@ let ProjectConfigurationController = {
                     collection.find(whereStr).sort({
                         sortId: 1
                     }).toArray(function (error, result) {
+
                         client.close();
                         if (error) {
                             console.log(error);
                             reject(error);
                         }
-                        resolve(result);
+                        if (!_.isEmpty(result)) {
+                            console.log("mongodb collect success: ", targetDB);
+                            resolve(result);
+                        } else {
+                            reject('数据库连接失败！');
+                        }
+
                     });
                 });
 

@@ -13,9 +13,16 @@ module.exports = app => {
             type: Date,
             default: Date.now
         },
-        tableName: String, // 表名 
+        tableName: {
+            type: String,
+            unique: true
+        }, // 表名 
         localPath: String, // 本地路径 
         type: String, // 项目类型 
+        mongoLinkAdress: {
+            type: String,
+            default: 'mongodb://localhost:27017/doracms2'
+        }
 
     });
 
