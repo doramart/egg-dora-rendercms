@@ -1,11 +1,11 @@
 <template>
   <div class="dr-toolbar">
-    <div class="option-button el-col-6">
+    <el-col :xs="12" :md="18" class="option-button">
       <!-- TOPBARLEFT -->
-    </div>
-    <div class="el-col-18">
+    </el-col>
+    <el-col :xs="12" :md="6" style="textAlign:right;">
       <!-- TOPBARRIGHT -->
-    </div>
+    </el-col>
   </div>
 </template>
 <script>

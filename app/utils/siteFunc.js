@@ -2,7 +2,7 @@
  * @Author: doramart 
  * @Date: 2019-09-25 14:16:44 
  * @Last Modified by: doramart
- * @Last Modified time: 2019-10-22 15:45:18
+ * @Last Modified time: 2020-07-28 17:44:10
  */
 
 const MongoClient = require('mongodb').MongoClient;
@@ -153,6 +153,7 @@ var siteFunc = {
             searchHtmlStr,
             searchInputStr,
             ruleStr,
+            storePropsStr
         }
     },
 
@@ -162,13 +163,13 @@ var siteFunc = {
     },
 
     // 插入数据到adminResource
-    addDataToAdminResource(MongoClient, tableName = '', routerInfo) {
+    addDataToAdminResource(MongoClient, databaseInfo = {}, routerInfo) {
 
         return new Promise((resolve, reject) => {
 
             if (!_.isEmpty(routerInfo)) {
-                let targetDB = tableName ? tableName : 'doracms2';
-                MongoClient.connect('mongodb://localhost:27017', {
+                let targetDB = databaseInfo.tableName ? databaseInfo.tableName : 'doracms2';
+                MongoClient.connect(databaseInfo.mongoLinkAdress, {
                     useNewUrlParser: true
                 }, function (err, client) {
                     console.log("连接成功: ", targetDB);
@@ -230,6 +231,22 @@ var siteFunc = {
         walk(basePath, fileList, folderList);
         return filesList;
     },
+
+    appendTxtToFileByLine(targetPath, line, targetStr) {
+        const fileData = fs.readFileSync(targetPath, 'utf8').split('\n');
+        fileData.splice(fileData.length - line, 0, targetStr);
+        fs.writeFileSync(targetPath, fileData.join('\n'), 'utf8');
+    },
+
+    // 创建文件并写入
+    createFileByStr(path, str) {
+        if (fs.existsSync(path)) {
+            fs.unlinkSync(path);
+        }
+        if (path && str) {
+            fs.writeFileSync(path, str, 'utf8')
+        }
+    }
 
 };
 module.exports = siteFunc;
